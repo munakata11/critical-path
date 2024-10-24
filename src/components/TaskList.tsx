@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Task } from "@/types/task";
-import { ArrowRight, X } from "lucide-react";
+import { X } from "lucide-react";
 
 interface TaskListProps {
   tasks: Task[];
@@ -47,7 +47,7 @@ const TaskList = ({ tasks, setTasks }: TaskListProps) => {
         <Card key={task.id} className="p-4">
           <div className="flex justify-between items-center mb-2">
             <div className="font-medium">
-              {task.name} ({task.duration}日)
+              {task.name} ({task.duration}{task.unit === "days" ? "日" : "時間"})
             </div>
             <Button
               variant="ghost"

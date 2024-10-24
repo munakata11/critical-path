@@ -47,7 +47,7 @@ const TaskDiagram = ({ tasks }: TaskDiagramProps) => {
       }
     });
 
-    if (!criticalEndTask) return new Set<number>();
+    if (!criticalEndTask) return { path: new Set<number>(), duration: 0 };
 
     const criticalPath = new Set<number>();
     let currentTask: Task | undefined = criticalEndTask;
@@ -66,7 +66,7 @@ const TaskDiagram = ({ tasks }: TaskDiagramProps) => {
       currentTask = criticalDependency;
     }
 
-    return criticalPath;
+    return { path: criticalPath, duration: maxDuration };
   };
 
   useEffect(() => {
@@ -74,13 +74,13 @@ const TaskDiagram = ({ tasks }: TaskDiagramProps) => {
 
     const generateDiagram = async () => {
       diagramRef.current!.innerHTML = "";
-      const criticalPath = findCriticalPath(tasks);
+      const { path: criticalPath, duration: totalDuration } = findCriticalPath(tasks);
 
       let diagram = "graph TD;\n";
       
       tasks.forEach((task) => {
         const isCritical = criticalPath.has(task.id);
-        diagram += `${task.id}["${task.name}<br/>${task.duration}日"]${isCritical ? ' style fill:#ff9999' : ''};\n`;
+        diagram += `${task.id}["${task.name}<br/>${task.duration}${task.unit === "days" ? "日" : "時間"}"]${isCritical ? ' style fill:#ff9999' : ''};\n`;
         
         task.dependencies.forEach((depId) => {
           const isEdgeCritical = criticalPath.has(depId) && criticalPath.has(task.id);

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import TaskList from "@/components/TaskList";
@@ -13,6 +14,7 @@ const Index = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskName, setNewTaskName] = useState("");
   const [newTaskDuration, setNewTaskDuration] = useState("");
+  const [newTaskUnit, setNewTaskUnit] = useState<"hours" | "days">("days");
   const { toast } = useToast();
 
   const addTask = () => {
@@ -39,6 +41,7 @@ const Index = () => {
       id: Date.now(),
       name: newTaskName,
       duration,
+      unit: newTaskUnit,
       dependencies: [],
     };
 
@@ -47,7 +50,7 @@ const Index = () => {
     setNewTaskDuration("");
     toast({
       title: "タスクを追加しました",
-      description: `${newTaskName} (${duration}日)`,
+      description: `${newTaskName} (${duration}${newTaskUnit === "days" ? "日" : "時間"})`,
     });
   };
 
@@ -65,12 +68,21 @@ const Index = () => {
               className="flex-1"
             />
             <Input
-              placeholder="所要日数"
+              placeholder="所要時間"
               type="number"
               value={newTaskDuration}
               onChange={(e) => setNewTaskDuration(e.target.value)}
               className="w-32"
             />
+            <Select value={newTaskUnit} onValueChange={(value: "hours" | "days") => setNewTaskUnit(value)}>
+              <SelectTrigger className="w-24">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="days">日</SelectItem>
+                <SelectItem value="hours">時間</SelectItem>
+              </SelectContent>
+            </Select>
             <Button onClick={addTask}>
               <Plus className="w-4 h-4 mr-2" />
               追加
