@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, ArrowRight } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import TaskList from "@/components/TaskList";
 import CriticalPath from "@/components/CriticalPath";
+import TaskDiagram from "@/components/TaskDiagram";
 import { Task } from "@/types/task";
 
 const Index = () => {
@@ -76,9 +77,12 @@ const Index = () => {
             </Button>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            <TaskList tasks={tasks} setTasks={setTasks} />
-            <CriticalPath tasks={tasks} />
+          <div className="grid gap-8">
+            <div className="grid md:grid-cols-2 gap-8">
+              <TaskList tasks={tasks} setTasks={setTasks} />
+              <CriticalPath tasks={tasks} />
+            </div>
+            <TaskDiagram tasks={tasks} />
           </div>
         </Card>
       </div>
