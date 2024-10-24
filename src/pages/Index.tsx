@@ -57,7 +57,18 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto space-y-8">
-        <h1 className="text-4xl font-bold text-gray-900">クリティカルパス分析</h1>
+        <div className="space-y-4">
+          <h1 className="text-4xl font-bold text-gray-900">クリティカルパス分析</h1>
+          <div className="bg-blue-50 p-4 rounded-lg space-y-2">
+            <h2 className="font-semibold text-blue-900">使い方</h2>
+            <ol className="list-decimal list-inside space-y-1 text-blue-800">
+              <li>タスク名と所要時間（日数または時間）を入力して追加ボタンをクリックします</li>
+              <li>タスク一覧から、各タスクの依存関係を設定します</li>
+              <li>依存関係図が自動的に更新され、クリティカルパスが表示されます</li>
+              <li>クリティカルパスは、プロジェクト全体の所要時間に影響を与える重要な経路です</li>
+            </ol>
+          </div>
+        </div>
         
         <Card className="p-6">
           <div className="flex gap-4 mb-6">

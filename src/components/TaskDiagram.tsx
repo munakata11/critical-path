@@ -74,17 +74,15 @@ const TaskDiagram = ({ tasks }: TaskDiagramProps) => {
 
     const generateDiagram = async () => {
       diagramRef.current!.innerHTML = "";
-      const { path: criticalPath, duration: totalDuration } = findCriticalPath(tasks);
+      const { path: criticalPath } = findCriticalPath(tasks);
 
       let diagram = "graph TD;\n";
       
       tasks.forEach((task) => {
-        const isCritical = criticalPath.has(task.id);
-        diagram += `${task.id}["${task.name}<br/>${task.duration}${task.unit === "days" ? "日" : "時間"}"]${isCritical ? ' style fill:#ff9999' : ''};\n`;
+        diagram += `${task.id}["${task.name}<br/>${task.duration}${task.unit === "days" ? "日" : "時間"}"];\n`;
         
         task.dependencies.forEach((depId) => {
-          const isEdgeCritical = criticalPath.has(depId) && criticalPath.has(task.id);
-          diagram += `${depId} --> ${task.id}${isEdgeCritical ? ' style stroke:#ff0000,stroke-width:2px' : ''};\n`;
+          diagram += `${depId} --> ${task.id};\n`;
         });
       });
 
@@ -105,9 +103,7 @@ const TaskDiagram = ({ tasks }: TaskDiagramProps) => {
     <Card className="p-4">
       <h2 className="text-xl font-semibold mb-4">タスク依存関係図</h2>
       <p className="text-sm text-gray-600 mb-4">
-        クリティカルパスとは、プロジェクトの開始から完了までの最長経路を示します。
-        赤色で強調表示された経路は、これらのタスクが遅延するとプロジェクト全体の完了が遅れることを意味します。
-        クリティカルパス上のタスクは特に注意深く管理する必要があります。
+        タスク間の依存関係を図示しています。各ノードはタスクを表し、矢印は依存関係を示します。
       </p>
       <div ref={diagramRef} className="w-full overflow-x-auto" />
     </Card>
