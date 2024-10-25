@@ -101,11 +101,9 @@ const Index = () => {
           </div>
 
           <div className="grid gap-8">
-            <div className="grid md:grid-cols-2 gap-8">
-              <TaskList tasks={tasks} setTasks={setTasks} />
-              <CriticalPath tasks={tasks} />
-            </div>
+            <TaskList tasks={tasks} setTasks={setTasks} />
             <TaskDiagram tasks={tasks} />
+            <CriticalPath tasks={tasks} />
           </div>
         </Card>
       </div>

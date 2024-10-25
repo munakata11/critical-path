@@ -10,6 +10,11 @@ const CriticalPath = ({ tasks }: CriticalPathProps) => {
   const criticalPath = useMemo(() => {
     if (tasks.length === 0) return { path: [], duration: 0 };
 
+    // 時間を日数に変換する関数
+    const normalizeToHours = (task: Task) => {
+      return task.unit === "days" ? task.duration * 24 : task.duration;
+    };
+
     const calculateEarliestStart = (task: Task, memo: Map<number, number>) => {
       if (memo.has(task.id)) return memo.get(task.id)!;
 
@@ -22,7 +27,7 @@ const CriticalPath = ({ tasks }: CriticalPathProps) => {
         ...task.dependencies.map((depId) => {
           const depTask = tasks.find((t) => t.id === depId)!;
           return (
-            calculateEarliestStart(depTask, memo) + depTask.duration
+            calculateEarliestStart(depTask, memo) + normalizeToHours(depTask)
           );
         })
       );
@@ -33,16 +38,14 @@ const CriticalPath = ({ tasks }: CriticalPathProps) => {
 
     const memo = new Map<number, number>();
     const endTasks = tasks.filter(
-      (task) =>
-        !tasks.some((t) => t.dependencies.includes(task.id))
+      (task) => !tasks.some((t) => t.dependencies.includes(task.id))
     );
 
     let maxDuration = 0;
     let criticalEndTask: Task | null = null;
 
     endTasks.forEach((task) => {
-      const duration =
-        calculateEarliestStart(task, memo) + task.duration;
+      const duration = calculateEarliestStart(task, memo) + normalizeToHours(task);
       if (duration > maxDuration) {
         maxDuration = duration;
         criticalEndTask = task;
@@ -62,7 +65,7 @@ const CriticalPath = ({ tasks }: CriticalPathProps) => {
         .map((depId) => tasks.find((t) => t.id === depId)!)
         .find(
           (depTask) =>
-            calculateEarliestStart(depTask, memo) + depTask.duration ===
+            calculateEarliestStart(depTask, memo) + normalizeToHours(depTask) ===
             earliestStart
         );
 
@@ -72,39 +75,46 @@ const CriticalPath = ({ tasks }: CriticalPathProps) => {
     return { path, duration: maxDuration };
   }, [tasks]);
 
+  const formatDuration = (hours: number) => {
+    if (hours < 24) {
+      return `${hours}時間`;
+    }
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+    if (remainingHours === 0) {
+      return `${days}日`;
+    }
+    return `${days}日と${remainingHours}時間`;
+  };
+
   return (
-    <div className="space-y-4">
+    <Card className="p-4">
       <h2 className="text-xl font-semibold mb-4">クリティカルパス</h2>
-      <Card className="p-4">
-        {criticalPath.path.length > 0 ? (
-          <>
-            <div className="mb-4">
-              <span className="font-medium">合計所要時間: </span>
-              {criticalPath.duration}日
-            </div>
-            <div className="space-y-2">
-              {criticalPath.path.map((task, index) => (
-                <div
-                  key={task.id}
-                  className="flex items-center gap-2"
-                >
-                  <div className="flex-1 p-2 bg-blue-50 rounded">
-                    {task.name} ({task.duration}日)
-                  </div>
-                  {index < criticalPath.path.length - 1 && (
-                    <div className="text-gray-400">↓</div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </>
-        ) : (
-          <div className="text-center text-gray-500 py-8">
-            タスクを追加してクリティカルパスを計算します
+      {criticalPath.path.length > 0 ? (
+        <>
+          <div className="mb-4">
+            <span className="font-medium">合計所要時間: </span>
+            {formatDuration(criticalPath.duration)}
           </div>
-        )}
-      </Card>
-    </div>
+          <div className="space-y-2">
+            {criticalPath.path.map((task, index) => (
+              <div key={task.id} className="flex items-center gap-2">
+                <div className="flex-1 p-2 bg-blue-50 rounded">
+                  {task.name} ({task.duration}{task.unit === "days" ? "日" : "時間"})
+                </div>
+                {index < criticalPath.path.length - 1 && (
+                  <div className="text-gray-400">↓</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="text-center text-gray-500 py-8">
+          タスクを追加してクリティカルパスを計算します
+        </div>
+      )}
+    </Card>
   );
 };
 
