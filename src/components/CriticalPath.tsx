@@ -10,7 +10,6 @@ const CriticalPath = ({ tasks }: CriticalPathProps) => {
   const criticalPath = useMemo(() => {
     if (tasks.length === 0) return { path: [], duration: 0 };
 
-    // 時間を日数に変換する関数
     const normalizeToHours = (task: Task) => {
       return task.unit === "days" ? task.duration * 24 : task.duration;
     };
@@ -96,14 +95,14 @@ const CriticalPath = ({ tasks }: CriticalPathProps) => {
             <span className="font-medium">合計所要時間: </span>
             {formatDuration(criticalPath.duration)}
           </div>
-          <div className="space-y-2">
+          <div className="flex items-center gap-2">
             {criticalPath.path.map((task, index) => (
               <div key={task.id} className="flex items-center gap-2">
-                <div className="flex-1 p-2 bg-blue-50 rounded">
+                <div className="p-2 bg-blue-50 rounded whitespace-nowrap">
                   {task.name} ({task.duration}{task.unit === "days" ? "日" : "時間"})
                 </div>
                 {index < criticalPath.path.length - 1 && (
-                  <div className="text-gray-400">↓</div>
+                  <div className="text-gray-400">→</div>
                 )}
               </div>
             ))}

@@ -27,6 +27,32 @@ const TaskList = ({ tasks, setTasks }: TaskListProps) => {
     );
   };
 
+  const addDependency = (taskId: number, dependencyId: string) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              dependencies: [...task.dependencies, parseInt(dependencyId)],
+            }
+          : task
+      )
+    );
+  };
+
+  const removeDependency = (taskId: number, dependencyId: number) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              dependencies: task.dependencies.filter((id) => id !== dependencyId),
+            }
+          : task
+      )
+    );
+  };
+
   const removeTask = (taskId: number) => {
     setTasks(tasks.filter((task) => task.id !== taskId));
   };
@@ -41,6 +67,7 @@ const TaskList = ({ tasks, setTasks }: TaskListProps) => {
               <TableHead>タスク名</TableHead>
               <TableHead>所要時間</TableHead>
               <TableHead>単位</TableHead>
+              <TableHead>依存タスク</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
@@ -74,6 +101,55 @@ const TaskList = ({ tasks, setTasks }: TaskListProps) => {
                       <SelectItem value="hours">時間</SelectItem>
                     </SelectContent>
                   </Select>
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-2">
+                    <Select
+                      onValueChange={(value) => addDependency(task.id, value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="依存タスクを追加" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tasks
+                          .filter(
+                            (t) =>
+                              t.id !== task.id &&
+                              !task.dependencies.includes(t.id)
+                          )
+                          .map((t) => (
+                            <SelectItem key={t.id} value={t.id.toString()}>
+                              {t.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    {task.dependencies.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {task.dependencies.map((depId) => {
+                          const depTask = tasks.find((t) => t.id === depId);
+                          return (
+                            depTask && (
+                              <div
+                                key={depId}
+                                className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1 text-sm"
+                              >
+                                {depTask.name}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-4 w-4"
+                                  onClick={() => removeDependency(task.id, depId)}
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            )
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <Button

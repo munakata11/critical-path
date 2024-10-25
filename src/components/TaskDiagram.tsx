@@ -10,74 +10,23 @@ interface TaskDiagramProps {
 const TaskDiagram = ({ tasks }: TaskDiagramProps) => {
   const diagramRef = useRef<HTMLDivElement>(null);
 
-  const findCriticalPath = (tasks: Task[]) => {
-    const memo = new Map<number, number>();
-    
-    const calculateEarliestStart = (task: Task) => {
-      if (memo.has(task.id)) return memo.get(task.id)!;
-
-      if (task.dependencies.length === 0) {
-        memo.set(task.id, 0);
-        return 0;
-      }
-
-      const maxDependencyEnd = Math.max(
-        ...task.dependencies.map((depId) => {
-          const depTask = tasks.find((t) => t.id === depId)!;
-          return calculateEarliestStart(depTask) + depTask.duration;
-        })
-      );
-
-      memo.set(task.id, maxDependencyEnd);
-      return maxDependencyEnd;
-    };
-
-    const endTasks = tasks.filter(
-      (task) => !tasks.some((t) => t.dependencies.includes(task.id))
-    );
-
-    let maxDuration = 0;
-    let criticalEndTask: Task | null = null;
-
-    endTasks.forEach((task) => {
-      const duration = calculateEarliestStart(task) + task.duration;
-      if (duration > maxDuration) {
-        maxDuration = duration;
-        criticalEndTask = task;
-      }
-    });
-
-    if (!criticalEndTask) return { path: new Set<number>(), duration: 0 };
-
-    const criticalPath = new Set<number>();
-    let currentTask: Task | undefined = criticalEndTask;
-
-    while (currentTask) {
-      criticalPath.add(currentTask.id);
-      const earliestStart = memo.get(currentTask.id)!;
-      
-      const criticalDependency = currentTask.dependencies
-        .map((depId) => tasks.find((t) => t.id === depId)!)
-        .find(
-          (depTask) =>
-            calculateEarliestStart(depTask) + depTask.duration === earliestStart
-        );
-
-      currentTask = criticalDependency;
-    }
-
-    return { path: criticalPath, duration: maxDuration };
-  };
-
   useEffect(() => {
     if (!diagramRef.current) return;
 
     const generateDiagram = async () => {
       diagramRef.current!.innerHTML = "";
-      const { path: criticalPath } = findCriticalPath(tasks);
 
-      let diagram = "graph TD;\n";
+      let diagram = "graph LR;\n";
       
+      // Add START node for tasks without dependencies
+      const startTasks = tasks.filter(task => task.dependencies.length === 0);
+      if (startTasks.length > 0) {
+        diagram += "START((START));\n";
+        startTasks.forEach(task => {
+          diagram += `START --> ${task.id};\n`;
+        });
+      }
+
       tasks.forEach((task) => {
         diagram += `${task.id}["${task.name}<br/>${task.duration}${task.unit === "days" ? "日" : "時間"}"];\n`;
         
@@ -86,8 +35,6 @@ const TaskDiagram = ({ tasks }: TaskDiagramProps) => {
         });
       });
 
-      mermaid.initialize({ startOnLoad: true, theme: "neutral" });
-      
       try {
         const { svg } = await mermaid.render("diagram", diagram);
         diagramRef.current!.innerHTML = svg;
