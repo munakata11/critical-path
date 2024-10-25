@@ -95,14 +95,14 @@ const CriticalPath = ({ tasks }: CriticalPathProps) => {
             <span className="font-medium">合計所要時間: </span>
             {formatDuration(criticalPath.duration)}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-start gap-2">
             {criticalPath.path.map((task, index) => (
               <div key={task.id} className="flex items-center gap-2">
                 <div className="p-2 bg-blue-50 rounded whitespace-nowrap">
-                  {task.name} ({task.duration}{task.unit === "days" ? "日" : "時間"})
+                  {task.name} ({task.duration || ""}{task.unit === "days" ? "日" : "時間"})
                 </div>
                 {index < criticalPath.path.length - 1 && (
-                  <div className="text-gray-400">→</div>
+                  <div className="text-gray-400 last:hidden">→</div>
                 )}
               </div>
             ))}
