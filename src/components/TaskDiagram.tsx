@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import mermaid from "mermaid";
 import { Task } from "@/types/task";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 interface TaskDiagramProps {
   tasks: Task[];
@@ -46,9 +48,34 @@ const TaskDiagram = ({ tasks }: TaskDiagramProps) => {
     generateDiagram();
   }, [tasks]);
 
+  const handleDownload = () => {
+    if (!diagramRef.current) return;
+    
+    const svg = diagramRef.current.querySelector('svg');
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([svgData], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'task-diagram.svg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <Card className="p-4">
-      <h2 className="text-xl font-semibold mb-4">タスク依存関係図</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">タスク依存関係図</h2>
+        <Button onClick={handleDownload} variant="outline" size="sm">
+          <Download className="w-4 h-4 mr-2" />
+          ダウンロード
+        </Button>
+      </div>
       <p className="text-sm text-gray-600 mb-4">
         タスク間の依存関係を図示しています。各ノードはタスクを表し、矢印は依存関係を示します。
       </p>

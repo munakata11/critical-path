@@ -85,7 +85,10 @@ const TaskList = ({ tasks, setTasks }: TaskListProps) => {
                     <Input
                       type="number"
                       value={task.duration || ""}
-                      onChange={(e) => updateTask(task.id, { duration: Number(e.target.value) || "" })}
+                      onChange={(e) => {
+                        const value = e.target.value === "" ? 0 : Number(e.target.value);
+                        updateTask(task.id, { duration: value });
+                      }}
                       min={0}
                     />
                   </TableCell>
