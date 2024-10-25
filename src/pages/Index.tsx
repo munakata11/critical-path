@@ -79,7 +79,7 @@ const Index = () => {
               className="flex-1"
             />
             <Input
-              placeholder="所要時間"
+              placeholder="所要日数"
               type="number"
               value={newTaskDuration}
               onChange={(e) => setNewTaskDuration(e.target.value)}
