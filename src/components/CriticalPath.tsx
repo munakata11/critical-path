@@ -90,7 +90,6 @@ const CriticalPath = ({ tasks }: CriticalPathProps) => {
     <Card className="p-4">
       <h2 className="text-xl font-semibold mb-4">クリティカルパス</h2>
       <div className="bg-blue-50 p-4 rounded-lg mb-4">
-        <h3 className="font-semibold text-blue-900 mb-2">クリティカルパスとは？</h3>
         <p className="text-sm text-blue-800">
           クリティカルパスは、プロジェクト全体の所要時間を決定する最も重要な一連のタスクです。
           このパス上のタスクが遅延すると、プロジェクト全体の完了が遅れることになります。
