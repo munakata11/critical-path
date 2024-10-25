@@ -66,7 +66,7 @@ const TaskList = ({ tasks, setTasks }: TaskListProps) => {
             <TableHeader>
               <TableRow>
                 <TableHead>タスク名</TableHead>
-                <TableHead>所要時間</TableHead>
+                <TableHead>所要日数(時間)</TableHead>
                 <TableHead>単位</TableHead>
                 <TableHead className="min-w-[200px]">依存タスク</TableHead>
                 <TableHead></TableHead>
