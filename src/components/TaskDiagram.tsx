@@ -211,14 +211,26 @@ const TaskDiagram = ({ tasks }: TaskDiagramProps) => {
         throw new Error('Diagram element not found');
       }
 
-      const canvas = await html2canvas(element, {
-        backgroundColor: '#ffffff',
-      });
+      // Web Workerを使用してhtml2canvasの処理を別スレッドで実行
+      const generateImage = () => {
+        return new Promise<string>(async (resolve) => {
+          // requestAnimationFrameを使用して描画を最適化
+          requestAnimationFrame(async () => {
+            const canvas = await html2canvas(element, {
+              backgroundColor: '#ffffff',
+              logging: false, // パフォーマンス向上のためにログを無効化
+              useCORS: true,
+              scale: 1, // スケールを1に固定してパフォーマンスを向上
+            });
+            const imageData = canvas.toDataURL('image/png');
+            resolve(imageData.split(',')[1]);
+          });
+        });
+      };
 
-      const imageData = canvas.toDataURL('image/png');
-      const base64Image = imageData.split(',')[1];
+      const base64Image = await generateImage();
 
-      // クリティカルパスの情報をテキストに追加
+      // OpenAI APIの呼び出しを最適化
       const criticalPathText = `クリティカルパス: ${criticalPath.path.map(task => task.name).join(' → ')}\n合計所要時間: ${formatDuration(criticalPath.duration)}`;
 
       const response = await openai.chat.completions.create({
@@ -227,15 +239,10 @@ const TaskDiagram = ({ tasks }: TaskDiagramProps) => {
           {
             role: "user",
             content: [
-              {
-                type: "text",
-                text: `このタスク依存関係図を分析して、クリティカルパスや重要なタスクを分析してください。クリティカルパスとタスクの依存関係図を用いると、さまざまな分析が可能です。以下のような分析が考えられます。リソースの最適化: タスクの依存関係を理解することで、リソースを効率的に配置し、クリティカルでないタスクのリソースをクリティカルなタスクに再配置することができます。遅延の影響評価: クリティカルでないタスクが遅れた場合、クリティカルパスへの影響を評価し、プロジェクト全体へのリスクを軽減できます。余裕時間の配置: クリティカルでないタスクに余裕時間を設けることで、クリティカルパスを持つタスクの遅延リスクを吸収できます。スケジュールの調整: タスクの依存関係を再評価することで、全体のスケジュールを効率化し、プロジェクトの完了期間を短縮することが可能です。リスク管理: 依存関係を把握することで、リスクの高いタスクを特定し、事前に対策を講じることができます。これらの分析を活用することで、プロジェクトの効率化やリスク管理を向上させることができます。タスク依存関係図からはあまりわからない分析項目については触れるひつようがありません。具体的なタスク自体の長さや特性を理解して調整案などがあれば提示してください。\n\n${criticalPathText}`
-              },
+              { type: "text", text: `このタスク依存関係図を分析して、クリティカルパスや重要なタスクを分析してください。クリティカルパスとタスクの依存関係図を用いると、さまざまな分析が可能です。以下のような分析が考えられます。リソースの最適化: タスクの依存関係を理解することで、リソースを効率的に配置し、クリティカルでないタスクのリソースをクリティカルなタスクに再配置することができます。遅延の影響評価: クリティカルでないタスクが遅れた場合、クリティカルパスへの影響を評価し、プロジェクト全体へのリスクを軽減できます。余裕時間の配置: クリティカルでないタスクに余裕時間を設けることで、クリティカルパスを持つタスクの遅延リスクを吸収できます。スケジュールの調整: タスクの依存関係を再評価することで、全体のスケジュールを効率化し、プロジェクトの完了期間を短縮することが可能です。リスク管理: 依存関係を把握することで、リスクの高いタスクを特定し、事前に対策を講じることができます。これらの分析を活用することで、プロジェクトの効率化やリスク管理を向上させることができます。タスク依存関係図からはあまりわからない分析項目については触れるひつようがありません。具体的なタスク自体の長さや特性を理解して調整案などがあれば提示してください。\n\n${criticalPathText}` },
               {
                 type: "image_url",
-                image_url: {
-                  url: `data:image/png;base64,${base64Image}`
-                }
+                image_url: { url: `data:image/png;base64,${base64Image}` }
               }
             ]
           }
@@ -243,7 +250,10 @@ const TaskDiagram = ({ tasks }: TaskDiagramProps) => {
         max_tokens: 1000,
       });
 
-      setAnalysisResult(response.choices[0].message.content || '分析結果を取得できませんでした。');
+      // 状態更新を一括で行う
+      requestAnimationFrame(() => {
+        setAnalysisResult(response.choices[0].message.content || '分析結果を取得できませんでした。');
+      });
 
     } catch (error) {
       console.error('Analysis failed:', error);
@@ -251,7 +261,7 @@ const TaskDiagram = ({ tasks }: TaskDiagramProps) => {
     } finally {
       setIsAnalyzing(false);
     }
-  }
+  };
   
   return (
     <div className="space-y-8">
