@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import TaskList from "@/components/TaskList";
-import CriticalPath from "@/components/CriticalPath";
 import TaskDiagram from "@/components/TaskDiagram";
 import { Task } from "@/types/task";
 
@@ -64,8 +63,9 @@ const Index = () => {
             <ol className="list-decimal list-inside space-y-1 text-blue-800">
               <li>タスク名と所要時間（日数または時間）を入力して追加ボタンをクリックします</li>
               <li>タスク一覧から、各タスクの依存関係を設定します</li>
-              <li>依存関係図が自動的に更新され、クリティカルパスが表示されます</li>
-              <li>クリティカルパスは、プロジェクト全体の所要時間に影響を与える重要な経路です</li>
+              <li>依存関係図が自動的に更新され、クリティカルパス（プロジェクト全体の所要時間を決定する最も重要な一連のタスク）が表示されます</li>
+              <li>タスク依存関係図についてAIを使って分析することができます</li>
+              <li>作成したタスク依存関係図はSVG,PNG,PDFいずれかの形式でダウンロードすることができます（ページを更新すると登録したタスクはリセットされますのでご注意ください）</li>
             </ol>
           </div>
         </div>
@@ -103,7 +103,6 @@ const Index = () => {
           <div className="grid gap-8">
             <TaskList tasks={tasks} setTasks={setTasks} />
             <TaskDiagram tasks={tasks} />
-            <CriticalPath tasks={tasks} />
           </div>
         </Card>
       </div>
